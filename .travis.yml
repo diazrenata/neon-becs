@@ -1,9 +1,10 @@
 language: r
-cache:
-- packages
 sudo: required
 dist: "trusty"
 warnings_are_errors: false
+
+before_install:
+    - Rscript -e 'remotes::install_github("diazrenata/replicatebecs")'
 
 matrix:
   include:
