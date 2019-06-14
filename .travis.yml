@@ -3,7 +3,16 @@ sudo: required
 dist: "trusty"
 warnings_are_errors: false
 
+addons:
+  apt:
+    packages:
+      - libgsl0-dbg
+      - libgsl0-dev
+- libgsl0ldbl
+
 before_install:
+    - sudo apt-get update -qq
+    - sudo apt-get install libudunits2-dev
     - Rscript -e 'remotes::install_github("diazrenata/replicatebecs")'
 
 matrix:
