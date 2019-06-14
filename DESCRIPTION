@@ -23,5 +23,5 @@ Imports:
     replicatebecs,
     testthat
 Remotes: 
-    diazrenata/replicatebecs
+    diazrenata/replicate-becs
 RoxygenNote: 6.1.1
