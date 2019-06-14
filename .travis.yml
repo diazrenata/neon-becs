@@ -5,9 +5,7 @@ sudo: required
 dist: "trusty"
 warnings_are_errors: false
 
-before_install:
-    - Rscript -e 'install.packages("remotes")'
-    - Rscript -e 'remotes::install_github("diazrenata/replicatebecs")'
+r_github_packages: diazrenata/replicatebecs
 
 matrix:
   include:
