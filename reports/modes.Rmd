@@ -1,0 +1,144 @@
+---
+title: "ISD analysis"
+output: html_notebook
+---
+```{r setup}
+library(replicatebecs)
+library(neonbecs)
+```
+
+Get a little Portal data:
+
+```{r get toy data}
+
+dat <- get_toy_portal_data()
+
+head(dat)
+
+dat_energy <- dat %>%
+  replicatebecs::add_energy_sizeclass()
+
+dat_isd <- dat_energy %>%
+  replicatebecs::make_isd()
+
+head(dat_isd)
+
+isd_plot <- plot_isd(dat_isd)
+isd_plot
+```
+Fit a GMM.
+
+```{r fit gmm}
+dat_gmm <- fit_gmm(dat_isd)
+
+dat_gmm$G
+
+dens <- dat_gmm$density
+
+dat_gmm_pdf <- get_pdf(dat_gmm)
+
+pdf_plot <- plot_gmm_pdf(dat_gmm_pdf)
+
+pdf_plot
+
+```
+What happens if I fit a GMM to this PDF?
+
+```{r gmm on pdf}
+
+second_isd <- data.frame(
+  ln_size = sample(dat_gmm_pdf$sizes, size = 1000, replace = T, prob = dat_gmm_pdf$density)
+)
+
+second_gmm <- fit_gmm(second_isd)
+
+second_gmm$G
+
+second_pdf <- get_pdf(second_gmm)
+
+second_pdf_plot <- plot_gmm_pdf(second_pdf)
+
+second_pdf_plot
+
+```
+
+
+```{r trying to classify}
+
+second_classification <- data.frame(ln_size = second_gmm$data, 
+                                    classification = second_gmm$classification) %>%
+  dplyr::distinct()
+
+class_plot <- ggplot2::ggplot(data = second_classification, ggplot2::aes(x = ln_size, y = classification)) +
+  ggplot2::geom_point(stat = "identity", ggplot2::aes(x = second_classification$ln_size, y = second_classification$classification)) +
+    ggplot2::theme_bw()
+
+
+class_plot
+
+isd_classification <- data.frame(ln_size = round(dat_isd$ln_size, digits = 2))
+  
+isd_classification <- isd_classification %>%
+  dplyr::left_join(second_classification, by = "ln_size")
+
+isd_class_plot <- ggplot2::ggplot(data = isd_classification, ggplot2::aes(x = ln_size, y = classification)) +
+  ggplot2::geom_point(stat = "identity", ggplot2::aes(x = isd_classification$ln_size, y = isd_classification$classification)) +
+    ggplot2::theme_bw()
+
+isd_class_plot
+```
+
+
+Kmeans clustering
+
+```{r kmeans}
+
+dat_modes <- get_modes(pdf = dat_gmm_pdf)
+dat_km <- kmeans(dat_isd$ln_size, centers = dat_modes, iter.max = 1000)
+
+dat_clustered <- cbind(dat_isd, dat_km$cluster) %>%
+  dplyr::rename(cluster = `dat_km$cluster`) %>%
+  dplyr::mutate(cluster = as.character(cluster))
+
+dat_cluster_plot <- ggplot2::ggplot(data = dat_clustered, ggplot2::aes(ln_size, color = cluster)) +
+  ggplot2::geom_freqpoly() +
+  ggplot2::theme_bw()
+
+dat_cluster_plot
+```
+
+```{r ps with gmms based on kmeans}
+
+cluster1 <- dat_clustered %>%
+  dplyr::filter(cluster == "1") %>%
+  dplyr::select(ln_size)
+
+cluster1_gmm <- fit_gmm(isd = cluster1)
+dat_clustered$p_1 <- predict(cluster1_gmm, newdat = dat_clustered$ln_size)
+
+dat_cluster_p1 <- ggplot2::ggplot(data = dat_clustered, ggplot2::aes(p_1, color = cluster)) +
+  ggplot2::geom_freqpoly() +
+  ggplot2::theme_bw()
+
+dat_cluster_p1
+
+max(dat_clustered$p_1[ which(dat_clustered$cluster == "2")])
+
+
+
+cluster2 <- dat_clustered %>%
+  dplyr::filter(cluster == "2") %>%
+  dplyr::select(ln_size)
+
+cluster2_gmm <- fit_gmm(isd = cluster2)
+dat_clustered$p_2 <- predict(cluster2_gmm, newdat = dat_clustered$ln_size)
+
+dat_cluster_p2 <- ggplot2::ggplot(data = dat_clustered, ggplot2::aes(p_2, color = cluster)) +
+  ggplot2::geom_freqpoly() +
+  ggplot2::theme_bw()
+
+dat_cluster_p2
+
+max(dat_clustered$p_2[ which(dat_clustered$cluster == "1")])
+
+```

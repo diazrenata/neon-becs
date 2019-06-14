@@ -1,0 +1,119 @@
+---
+title: "ISD analysis"
+output: html_notebook
+---
+```{r setup}
+library(replicatebecs)
+```
+
+## Fitting GMMs to ISDS
+
+```{r set up GMMS} 
+communities <- load_paper_data()
+
+communities_energy <- lapply(communities, add_energy_sizeclass)
+isds <- lapply(communities_energy, make_isd)
+
+isds_plot <- plot_paper_dists(isds, dist_type = "isd")
+
+isds_plot
+
+gmms <- lapply(isds, fit_gmm)
+names(gmms) <- names(communities)
+```
+
+
+Assuming ISDs are multimodal (pending figuring out how to a. fit a power law and b. compare fit of power law to best-fitting GMM)...
+
+### Plot GMMs
+
+```{r plot gmm pdfs}
+
+pdfs <- lapply(gmms, get_pdf)
+
+all_gmm_plot <- plot_paper_dists(pdfs, dist_type = "gmm_pdf")
+
+all_gmm_plot
+
+```
+
+### Number of gaussians
+
+```{r nb of modes}
+ngaussians <- vapply(gmms, get_ngaussians, FUN.VALUE = 1)
+names(ngaussians) <- names(gmms)
+ngaussians
+```
+
+Note that there can be more modes (Gaussians) than appear in the composite PDF. 
+
+### Number and placement of modes
+```{r density modes}
+
+modes <- lapply(pdfs, get_modes)
+
+nmodes <- vapply(modes, FUN = length, FUN.VALUE = 4)
+
+modes
+
+nmodes
+```
+
+### Single-community mode structure
+
+
+
+
+```{r more messing around}
+portal_gmm = gmms$portal
+
+portal_gmm_stuff <- data.frame(
+  ln_size = portal_gmm$data,
+  classification = portal_gmm$classification,
+  uncertainty = portal_gmm$uncertainty,
+  density = portal_gmm$density
+)
+
+portal_gmm_stuff_plot <- ggplot2::ggplot(data = portal_gmm_stuff, ggplot2::aes(x = ln_size, y = density)) +
+  ggplot2::geom_point(stat = "identity", ggplot2::aes(x = portal_gmm_stuff$ln_size, y = portal_gmm_stuff$density), colour = portal_gmm_stuff$classification, size = portal_gmm_stuff$uncertainty) + 
+    ggplot2::labs(x = "Size (log)", y = "Density") +
+    ggplot2::theme_bw()
+  
+portal_gmm_stuff_plot
+
+```
+
+
+```{r gmm messing around, eval = F, include = F}
+
+portal_gmm_pdf <- pdfs$portal
+
+portal_gmm_isd <- data.frame(
+  ln_size = sample(portal_gmm_pdf$sizes, size = 1000, replace = TRUE, prob = portal_gmm_pdf$density))
+  
+portal_gmm_isd_plot <- plot_isd(portal_gmm_isd)
+portal_gmm_isd_plot
+
+portal_gmm_pdf_gmm <- fit_gmm(portal_gmm_isd)
+
+portal_gmm_pdf_gmm$G
+
+portal_gmm_pdf_gmm_pdf <- get_pdf(portal_gmm_pdf_gmm)
+
+plot_gmm_pdf(portal_gmm_pdf_gmm_pdf)
+
+portal_gmm_pdfd_stuff <- data.frame(
+  ln_size = portal_gmm_pdf_gmm$data,
+  classification = portal_gmm_pdf_gmm$classification,
+  uncertainty = portal_gmm_pdf_gmm$uncertainty,
+  density = portal_gmm_pdf_gmm$density
+)
+
+portal_gmm_pdfd_stuff_plot <- ggplot2::ggplot(data = portal_gmm_pdfd_stuff, ggplot2::aes(x = ln_size, y = density)) +
+  ggplot2::geom_point(stat = "identity", ggplot2::aes(x = portal_gmm_pdfd_stuff$ln_size, y = portal_gmm_pdfd_stuff$density), colour = portal_gmm_pdfd_stuff$classification, size = portal_gmm_pdfd_stuff$uncertainty) + 
+    ggplot2::labs(x = "Size (log)", y = "Density") +
+    ggplot2::theme_bw()
+  
+portal_gmm_pdfd_stuff_plot
+```
+### Ratio of modes
