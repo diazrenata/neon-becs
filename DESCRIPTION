@@ -19,6 +19,7 @@ Imports:
     neonUtilities,
     pastecs,
     portalr,
+    remotes,
     replicatebecs,
     testthat
 Remotes: 
