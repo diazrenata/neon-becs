@@ -2,6 +2,7 @@
 
 export("%>%")
 export(fit_gmm)
+export(fit_power_law)
 export(get_bic)
 export(get_gaussianmeans)
 export(get_modes)

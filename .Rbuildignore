@@ -3,4 +3,4 @@
 ^LICENSE\.md$
 R/get_neon_data.R
 /working-data/
-^reports/pareto\.R$
+^reports/powerlawstuff\.R$
