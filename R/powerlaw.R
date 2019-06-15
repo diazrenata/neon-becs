@@ -34,3 +34,19 @@ loglik_pl <- function(dat, plpars) {
 
   return(summed_loglik)
 }
+
+#' Sample from fitted powerlaw
+#'
+#' @param dat community dataframe with individual_sizes column
+#' @param plpars result of get_pl_pars(dat)
+#' @param nsamples how many to draw
+#'
+#' @return matrix of samples
+#' @export
+#'
+#' @importFrom poweRlaw rplcon
+sample_pl <- function(dat, plpars, nsamples) {
+  samples <- replicate(nsamples, expr = poweRlaw::rplcon(n = nrow(dat), xmin = plpars$xmin, alpha = plpars$alpha), simplify = T)
+
+  return(samples)
+}
