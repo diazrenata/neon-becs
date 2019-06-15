@@ -1,10 +1,10 @@
-#' Fit powerlaw to community ISD
+#' Get parameters for powerlaw fit to community ISD
 #'
 #' @param dat community df with `individual_sizes` column
 #' @param estimate_min whether to estimate the minimum for the power law, or use the minimum of `individual_sizes`. Defaults TRUE for estimate.
-#' @return dataframe of simulated dat drawn from fitted power law
+#' @return list of xmin and alpha
 #' @export
-fit_power_law <- function(dat, estimate_min = TRUE) {
+get_pl_pars <- function(dat, estimate_min = TRUE) {
 
   library(poweRlaw)
 
@@ -17,10 +17,20 @@ fit_power_law <- function(dat, estimate_min = TRUE) {
   m$setXmin(minimum_x)
   estimated_alpha = estimate_pars(m)$pars
 
-  sizevect = rplcon(n = nrow(dat), xmin = minimum_x, alpha = estimated_alpha)
+  plpars <- list(xmin = minimum_x,
+                 alpha = estimated_alpha)
 
-  pl_dat <- data.frame(individual_species_ids = NA,
-                       individual_sizes = sizevect)
-  rm(m)
-  return(pl_dat)
+  return(plpars)
+}
+
+#' Get loglik of empirical from powerlaw
+#' @param dat community dataframe with individual_sizes column
+#' @param plpars result of get_pl_pars(dat)
+#' @return loglikelihood
+#' @export
+#' @importFrom poweRlaw dplcon
+loglik_pl <- function(dat, plpars) {
+  summed_loglik <- sum(poweRlaw::dplcon(dat$individual_sizes, xmin = plpars$xmin, alpha = plpars$alpha, log = TRUE))
+
+  return(summed_loglik)
 }

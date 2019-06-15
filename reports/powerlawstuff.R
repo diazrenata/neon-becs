@@ -19,3 +19,11 @@ powerlaw_comm <- data.frame(individual_species_ids = NA,
 
 plot_isd(dat_isd)
 plot_isd(powerlaw_comm)
+
+
+
+sizevect = rplcon(n = nrow(dat), xmin = minimum_x, alpha = estimated_alpha)
+
+pl_dat <- data.frame(individual_species_ids = NA,
+                     individual_sizes = sizevect)
+dplcon(x, xmin, alpha, log = FALSE)
