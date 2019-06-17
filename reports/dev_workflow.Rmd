@@ -1,0 +1,26 @@
+---
+title: "Form of ISDs, IEDs workflow"
+output: html_notebook
+---
+# Setup, get data
+```{r setup, get community data}
+library(neonbecs)
+dat <- get_toy_portal_data()
+
+head(dat)
+
+dat_energy <- dat %>%
+  replicatebecs::add_energy_sizeclass()
+
+dat_isd <- dat_energy %>%
+  make_isd()
+
+head(dat_isd)
+
+```
+
+# Fit power law
+
+```{r fit power law}
+
+```

@@ -4,12 +4,14 @@
 \alias{get_pl_pars}
 \title{Get parameters for powerlaw fit to community ISD}
 \usage{
-get_pl_pars(dat, estimate_min = TRUE)
+get_pl_pars(dat, estimate_min = TRUE, size_or_energy = "size")
 }
 \arguments{
 \item{dat}{community df with `individual_sizes` column}
 
 \item{estimate_min}{whether to estimate the minimum for the power law, or use the minimum of `individual_sizes`. Defaults TRUE for estimate.}
+
+\item{size_or_energy}{"size" or "energy", defaults "size"}
 }
 \value{
 list of xmin and alpha

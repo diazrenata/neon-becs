@@ -2,17 +2,26 @@
 #'
 #' @param dat community df with `individual_sizes` column
 #' @param estimate_min whether to estimate the minimum for the power law, or use the minimum of `individual_sizes`. Defaults TRUE for estimate.
+#' @param size_or_energy "size" or "energy", defaults "size"
 #' @return list of xmin and alpha
 #' @export
-get_pl_pars <- function(dat, estimate_min = TRUE) {
+get_pl_pars <- function(dat, estimate_min = TRUE, size_or_energy = "size") {
 
   library(poweRlaw)
-
-  m = conpl$new(dat$individual_sizes)
-  if(estimate_min) {
-    minimum_x = estimate_xmin(m)$xmin
-  } else {
-    minimum_x = min(dat$individual_sizes)
+  if(size_or_energy == "size") {
+    m = conpl$new(dat$individual_sizes)
+    if(estimate_min) {
+      minimum_x = estimate_xmin(m)$xmin
+    } else {
+      minimum_x = min(dat$individual_sizes)
+    }
+  } else if (size_or_energy == "energy") {
+    m = conpl$new(dat$individual_energy)
+    if(estimate_min) {
+      minimum_x = estimate_xmin(m)$xmin
+    } else {
+      minimum_x = min(dat$individual_energy)
+    }
   }
   m$setXmin(minimum_x)
   estimated_alpha = estimate_pars(m)$pars
@@ -26,12 +35,17 @@ get_pl_pars <- function(dat, estimate_min = TRUE) {
 #' Get loglik of empirical from powerlaw
 #' @param dat community dataframe with individual_sizes column
 #' @param plpars result of get_pl_pars(dat)
+#' @param size_or_energy "size" or "energy", defaults "size"
 #' @return loglikelihood
 #' @export
 #' @importFrom poweRlaw dplcon
-loglik_pl <- function(dat, plpars) {
-  summed_loglik <- sum(poweRlaw::dplcon(dat$individual_sizes, xmin = plpars$xmin, alpha = plpars$alpha, log = TRUE))
+loglik_pl <- function(dat, plpars, size_or_energy = "size") {
+  if(size_or_energy == "size") {
+    summed_loglik <- sum(poweRlaw::dplcon(dat$individual_sizes, xmin = plpars$xmin, alpha = plpars$alpha, log = TRUE))
+  } else if (size_or_energy == "energy") {
 
+    summed_loglik <- sum(poweRlaw::dplcon(dat$individual_energy, xmin = plpars$xmin, alpha = plpars$alpha, log = TRUE))
+  }
   return(summed_loglik)
 }
 
