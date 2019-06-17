@@ -43,11 +43,11 @@ print(bsd_plot)
 ```{r fit power law}
 pl_par_size <- get_pl_pars(dat = dat, estimate_min = TRUE, size_or_energy = "size")
 
-pl_size_sample <- sample_pl(dat = dat, plpars = pl_par_size, nsamples = 1)
+pl_size_sample <- sample_pl(dat = dat, plpars = pl_par_size, nsamples = 1000)
 
 pl_par_size_forcemin <-  get_pl_pars(dat = dat, estimate_min = FALSE, size_or_energy = "size")
 
-pl_size_forcemin_sample <- sample_pl(dat = dat, plpars = pl_par_size_forcemin, nsamples = 1)
+pl_size_forcemin_sample <- sample_pl(dat = dat, plpars = pl_par_size_forcemin, nsamples = 1000)
 ```
 
 ### Plot power law
@@ -75,28 +75,44 @@ print(pl_isd_fm_plot)
 
 ### Bootstrap power law
 
-## Uniform on log scale
+RMD is puzzled re: whether it makes sense to bootstrap logliks from powerlaw
 
-_This might be the same as the powerlaw, RMD is unsure._
+OR 
 
-### Fit uniform on log scale
+do some kind of subsetting data into training and test datasets and then seeing how well the power law can predict data in the test dataset.
 
-### Plot uniform on log scale
+This seems like more of a formality than anything, these are visually *not* well described by these power law fits.
 
-### Bootstrap uniform on log scale
+```{r bootstrap power laws}
+pl_loglik_sampled <- apply(pl_size_sample, MARGIN = 2, FUN = loglik_pl, plpars = pl_par_size)
+pl_loglik_sampled_emp <- loglik_pl(dat$individual_sizes, plpars = pl_par_size)
+pl_loglik_sampled_ecdf <- ecdf(pl_loglik_sampled)
+pl_loglik_size_z <- pl_loglik_sampled_ecdf(pl_loglik_sampled_emp)
 
-## Lognormal?
+pl_loglik_sampled_forcemin <- apply(pl_size_forcemin_sample, MARGIN = 2, FUN = loglik_pl, plpars = pl_par_size_forcemin)
+pl_loglik_fm_sampled_emp <- loglik_pl(dat$individual_sizes, plpars = pl_par_size_forcemin)
+pl_loglik_fm_sampled_ecdf <- ecdf(pl_loglik_sampled_forcemin)
+pl_loglik_size_fm_z <- pl_loglik_fm_sampled_ecdf(pl_loglik_fm_sampled_emp)
 
-### Fit lognormal
 
-### Plot lognormal
-
-### Bootstrap lognormal
+pl_loglik_size_z
+pl_loglik_size_fm_z
+```
 
 ## GMM
 
 ### Fit GMM
 
+```{r fit GMM}
+dat_gmm <- fit_gmm(dat_isd)
+dat_gmm_pdf <- get_pdf(dat_gmm)
+```
+
 ### Plot GMM
+
+```{r plot GMM}
+gmm_plot <- plot_gmm_pdf(dat_gmm_pdf, pdf_name = "Toy Portal")
+print(gmm_plot)
+```
 
 ### Bootstrap GMM?

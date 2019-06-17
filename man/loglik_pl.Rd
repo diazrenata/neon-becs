@@ -4,14 +4,12 @@
 \alias{loglik_pl}
 \title{Get loglik of empirical from powerlaw}
 \usage{
-loglik_pl(dat, plpars, size_or_energy = "size")
+loglik_pl(values, plpars)
 }
 \arguments{
-\item{dat}{community dataframe with individual_sizes column}
+\item{values}{individual_sizes or individual_energy column}
 
 \item{plpars}{result of get_pl_pars(dat)}
-
-\item{size_or_energy}{"size" or "energy", defaults "size"}
 }
 \value{
 loglikelihood
