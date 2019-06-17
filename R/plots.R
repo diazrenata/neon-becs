@@ -48,3 +48,52 @@ plot_gmm_pdf <- function(gmm_pdf, pdf_name = NULL) {
   return(pdf_plot)
 
 }
+
+#' @title Plot ied
+#' @param ied result of `make_isd`
+#' @param ied_name community name, defaults NULL
+#' @return plot of IED
+#' @export
+plot_ied <- function(ied, ied_name = NULL) {
+
+  if(!is.null(ied_name)) {
+    plot_name = paste0("Individuals energy distribution: ", ied_name)
+  } else {
+    plot_name = "Individuals energy distribution"
+  }
+
+  this_ied_plot <- ggplot2::ggplot(data = ied, ggplot2::aes(ied$ln_energy, xmin = 0, xmax = 1)) +
+    ggplot2::geom_histogram(data = ied, stat = "bin",
+                            binwidth = 0.01,
+                            show.legend = NA,
+                            inherit.aes = TRUE)  +
+    ggplot2::labs(x = "ln(energy)", y = "Number of individuals", title = plot_name) +
+    ggplot2::theme_bw()
+
+  return(this_ied_plot)
+}
+
+
+#' @title Plot isd
+#' @param isd result of `make_isd`
+#' @param isd_name community name, defaults NULL
+#' @return plot of ISD
+#' @export
+plot_isd <- function(isd, isd_name = NULL){
+
+  if(!is.null(isd_name)) {
+    plot_name = paste0("Individuals size distribution: ", isd_name)
+  } else {
+    plot_name = "Individuals size distribution"
+  }
+
+  this_isd_plot <- ggplot2::ggplot(data = isd, ggplot2::aes(isd$ln_size, xmin = 0, xmax = 1)) +
+    ggplot2::geom_histogram(data = isd, stat = "bin",
+                            binwidth = 0.01,
+                            show.legend = NA,
+                            inherit.aes = TRUE)  +
+    ggplot2::labs(x = "ln(size)", y = "Number of individuals", title = plot_name) +
+    ggplot2::theme_bw()
+
+  return(this_isd_plot)
+}
