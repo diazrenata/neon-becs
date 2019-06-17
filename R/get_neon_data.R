@@ -1,3 +1,10 @@
+#' Download NEON data
+#'
+#' Download raw NEON small mammal data using neonUtilities.
+#'
+#' @export
+#' @importFrom neonUtilities zipsByProduct stackByTable
+#' @importFrom here here
 download_neon_data <- function(){
 
   neonUtilities::zipsByProduct(dpID = "DP1.10072.001", site = "all",
@@ -9,6 +16,14 @@ download_neon_data <- function(){
   neonUtilities::stackByTable(filepath = filepath_forstack, folder = T)
 }
 
+#' Process NEON data
+#' Load NEON mammal trapping data
+#' Filter to target taxa and remove problem sites following Read et al 2018 Ecography: https://figshare.com/articles/A_thermal_gradient_of_trait_similarity_across_North_America/5339407
+#' @return TRUE if successful
+#' @export
+#' @importFrom here here
+#' @importFrom neonUtilities getTaxonTable
+#' @importFrom dplyr select filter distinct
 process_neon_data <- function(){
 
   variables <- read.csv(here::here("inst", "data", "raw", "filesToStack10072", "stackedFiles", "variables.csv"), stringsAsFactors = F)
@@ -62,6 +77,11 @@ process_neon_data <- function(){
   return(TRUE)
 }
 
+#' Load NEON data
+#'
+#' @return list of NEON community data
+#' @export
+#' @importFrom here here
 load_neon_data <- function() {
   neon_paths <- list.files(path = here::here("inst", "data", "processed"), full.names = TRUE)
   neon_filenames <- list.files(path = here::here("inst", "data", "processed"))

@@ -22,7 +22,8 @@ Imports:
     poweRlaw,
     remotes,
     replicatebecs,
-    testthat
+    testthat,
+    tidyr
 Remotes: 
     diazrenata/replicate-becs
 RoxygenNote: 6.1.1
