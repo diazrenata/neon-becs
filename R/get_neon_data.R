@@ -61,3 +61,20 @@ process_neon_data <- function(){
 
   return(TRUE)
 }
+
+load_neon_data <- function() {
+  neon_paths <- list.files(path = here::here("inst", "data", "processed"), full.names = TRUE)
+  neon_filenames <- list.files(path = here::here("inst", "data", "processed"))
+
+  trim_neon_names <- function(neon_site_filename) {
+    this_name <- strsplit(neon_site_filename, split = "_processed.csv")[[1]]
+    return(this_name)
+  }
+  neon_names <- vapply(neon_filenames, FUN = trim_neon_names, FUN.VALUE = "ABBY")
+
+  neon_data <- lapply(neon_paths, FUN = read.csv, stringsAsFactors = F)
+
+  names(neon_data) <- neon_names
+
+  return(neon_data)
+}
