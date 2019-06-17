@@ -19,8 +19,84 @@ head(dat_isd)
 
 ```
 
-# Fit power law
+## Plot data
+
+```{r plot data}
+
+ied_plot <- plot_ied(ied = dat_isd, ied_name = "Toy Portal")
+
+isd_plot <- plot_isd(isd = dat_isd, isd_name = "Toy Portal")
+
+dat_bsd <- replicatebecs::make_bsd(raw_community = dat, ln_units = .1)
+bsd_plot <- replicatebecs::plot_bsd(bsd = dat_bsd, bsd_name = "Toy Portal")
+print(ied_plot)
+print(isd_plot)
+print(bsd_plot)
+```
+
+# Fitting & plotting distributions
+
+## Powerlaw
+
+### Fit powerlaw
 
 ```{r fit power law}
+pl_par_size <- get_pl_pars(dat = dat, estimate_min = TRUE, size_or_energy = "size")
+
+pl_size_sample <- sample_pl(dat = dat, plpars = pl_par_size, nsamples = 1)
+
+pl_par_size_forcemin <-  get_pl_pars(dat = dat, estimate_min = FALSE, size_or_energy = "size")
+
+pl_size_forcemin_sample <- sample_pl(dat = dat, plpars = pl_par_size_forcemin, nsamples = 1)
+```
+
+### Plot power law
+
+```{r plot a sample from fitted pl}
+pl_isd <- dat %>%
+  dplyr::mutate(individual_sizes = pl_size_sample[,1]) %>%
+  replicatebecs::add_energy_sizeclass() %>%
+  make_isd()
+
+pl_isd_plot <- plot_isd(pl_isd, isd_name = "Sampled power law")
+
+print(pl_isd_plot)
+
+pl_isd_fm <- dat %>%
+  dplyr::mutate(individual_sizes = pl_size_forcemin_sample[,1]) %>%
+  replicatebecs::add_energy_sizeclass() %>%
+  make_isd()
+
+pl_isd_fm_plot <- plot_isd(pl_isd_fm, isd_name = "Sampled power law forced min")
+
+print(pl_isd_fm_plot)
 
 ```
+
+### Bootstrap power law
+
+## Uniform on log scale
+
+_This might be the same as the powerlaw, RMD is unsure._
+
+### Fit uniform on log scale
+
+### Plot uniform on log scale
+
+### Bootstrap uniform on log scale
+
+## Lognormal?
+
+### Fit lognormal
+
+### Plot lognormal
+
+### Bootstrap lognormal
+
+## GMM
+
+### Fit GMM
+
+### Plot GMM
+
+### Bootstrap GMM?
