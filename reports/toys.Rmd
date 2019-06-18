@@ -1,0 +1,7 @@
+---
+title: "Constructing toy communities"
+output: html_notebook
+---
+
+Playing with ways to put together toy communities, to use to develop methods to test various hypotheses/statements about how ISDs/BSDs are structured in mammalian communities.
+
