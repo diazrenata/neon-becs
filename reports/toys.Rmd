@@ -5,3 +5,54 @@ output: html_notebook
 
 Playing with ways to put together toy communities, to use to develop methods to test various hypotheses/statements about how ISDs/BSDs are structured in mammalian communities.
 
+```{r setup}
+library(neonbecs)
+S <- 9
+min_body_size <- 8
+max_body_size <- 150
+N <- 700
+```
+
+```{r logunif?}
+
+loguniform_bsd <- assign_mean_mass(S = S, min_size = min_body_size, 
+                                   max_size = max_body_size, 
+                                   assumption = "log_uniform")
+
+loguniform_isd <- data.frame(individual_species_id = assign_species_id(S = S, N = N))
+
+
+loguniform_isd$individual_sizes <- vapply(loguniform_isd$individual_species_id, 
+                                         FUN = assign_individual_mass,
+                                         bsd = loguniform_bsd, 
+                                         assumptions = list(sd = .1),
+                                         FUN.VALUE = 50)
+
+loguniform_isd <- loguniform_isd %>%
+  replicatebecs::add_energy_sizeclass() %>%
+  make_isd()
+
+loguniform_isd_plot <- plot_isd(loguniform_isd)
+loguniform_isd_plot
+
+```
+```{r hutchinson}
+hutch_bsd <- assign_mean_mass(S = S, min_size = min_body_size,
+                              max_size = max_body_size,
+                              assumption = "hutchinson")
+hutch_isd <- data.frame(individual_species_id = assign_species_id(S = S, N = N))
+
+hutch_isd$individual_sizes <- vapply(hutch_isd$individual_species_id, 
+                                         FUN = assign_individual_mass,
+                                         bsd = hutch_bsd, 
+                                         assumptions = list(sd = .1),
+                                         FUN.VALUE = 50)
+hutch_isd <- hutch_isd %>%
+  replicatebecs::add_energy_sizeclass() %>%
+  make_isd()
+
+hutch_isd_plot <- plot_isd(hutch_isd)
+hutch_isd_plot
+
+
+```
