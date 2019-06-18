@@ -3,3 +3,4 @@
 ^LICENSE\.md$
 /working-data/
 ^reports/*
+^reports/thoughts\.docx$
