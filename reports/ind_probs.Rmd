@@ -1,0 +1,140 @@
+---
+title: "Individual based probabilities"
+output: html_notebook
+---
+
+```{r setup, get community data}
+library(neonbecs)
+dat <- get_toy_portal_data()
+
+head(dat)
+
+dat_energy <- dat %>%
+  replicatebecs::add_energy_sizeclass()
+
+dat_isd <- dat_energy %>%
+  make_isd()
+
+head(dat_isd)
+
+```
+
+## Plot data
+
+```{r plot data}
+
+ied_plot <- plot_ied(ied = dat_isd, ied_name = "Toy Portal")
+
+isd_plot <- plot_isd(isd = dat_isd, isd_name = "Toy Portal")
+
+dat_bsd <- replicatebecs::make_bsd(raw_community = dat, ln_units = .1)
+bsd_plot <- replicatebecs::plot_bsd(bsd = dat_bsd, bsd_name = "Toy Portal")
+print(ied_plot)
+print(isd_plot)
+print(bsd_plot)
+```
+
+
+## Fit GMM
+
+```{r fit GMM}
+dat_gmm <- fit_gmm(dat_isd)
+dat_gmm_pdf <- get_pdf(dat_gmm)
+```
+
+## Plot GMM
+
+```{r plot GMM}
+gmm_plot <- plot_gmm_pdf(dat_gmm_pdf, pdf_name = "Toy Portal")
+print(gmm_plot)
+```
+
+
+Kmeans clustering starting from GMM modes
+
+```{r kmeans}
+
+dat_modes <- get_modes(isd_pdf = dat_gmm_pdf)
+dat_km <- kmeans(dat_isd$ln_size, centers = dat_modes, iter.max = 1000)
+
+dat_clustered <- cbind(dat_isd, dat_km$cluster) %>%
+  dplyr::rename(cluster = `dat_km$cluster`) %>%
+  dplyr::mutate(cluster = as.character(cluster))
+
+dat_cluster_plot <- ggplot2::ggplot(data = dat_clustered, ggplot2::aes(ln_size, color = cluster)) +
+  ggplot2::geom_freqpoly() +
+  ggplot2::theme_bw()
+
+dat_cluster_plot
+```
+
+```{r ps with gmms based on kmeans}
+
+cluster1 <- dat_clustered %>%
+  dplyr::filter(cluster == "1") %>%
+  dplyr::select(ln_size)
+
+cluster1_gmm <- fit_gmm(isd = cluster1)
+plot(cluster1_gmm, what = "density")
+dat_clustered$p_1  <- predict(cluster1_gmm, newdat = dat_clustered$ln_size, logarithm = TRUE)
+
+dat_cluster_p1 <- ggplot2::ggplot(data = dat_clustered, ggplot2::aes(p_1, color = cluster)) +
+  ggplot2::geom_freqpoly() +
+  ggplot2::theme_bw()
+
+dat_cluster_p1
+
+max(dat_clustered$p_1[ which(dat_clustered$cluster == "2")])
+
+cluster2 <- dat_clustered %>%
+  dplyr::filter(cluster == "2") %>%
+  dplyr::select(ln_size)
+
+cluster2_gmm <- fit_gmm(isd = cluster2)
+dat_clustered$p_2 <- predict(cluster2_gmm, newdat = dat_clustered$ln_size, logarithm = TRUE)
+
+dat_cluster_p2 <- ggplot2::ggplot(data = dat_clustered, ggplot2::aes(p_2, color = cluster)) +
+  ggplot2::geom_freqpoly() +
+  ggplot2::theme_bw()
+
+dat_cluster_p2
+
+max(dat_clustered$p_2[ which(dat_clustered$cluster == "1")])
+
+
+dat_clustered <- dat_clustered %>%
+  dplyr::mutate(max_p = dplyr::case_when(
+    p_1 > p_2 ~ p_1,
+    p_2 > p_1 ~ p_2,
+    p_1 == p_2 ~ p_1
+  ))
+newplot <- ggplot2::ggplot(data = dat_clustered, ggplot2::aes(x = size_class, y = max_p, color = individual_species_ids)) +
+  ggplot2::geom_jitter(inherit.aes = TRUE) + 
+  ggplot2::theme_bw()
+newplot
+
+
+```
+
+```{r species ps distributions}
+species_ps <- list()
+
+unique_species <- unique(dat_clustered$individual_species_ids)
+
+for(i in 1:length(unique_species)) {
+  species_ps[[i]] <- dplyr::filter(dat_clustered, individual_species_ids == unique_species[i])
+  names(species_ps)[i] <- as.character(unique_species[i])
+}
+
+
+plot_species_p <- function(species_p_table) {
+  this_plot <- ggplot2::ggplot(data = species_p_table, ggplot2::aes(max_p)) +
+    ggplot2::xlim(0, max(dat_clustered$max_p)) + 
+    ggplot2::geom_freqpoly(inherit.aes = TRUE) +
+    ggplot2::theme_bw()
+}
+
+species_ps_plots <- lapply(species_ps, plot_species_p)
+
+print(species_ps_plots)
+```
