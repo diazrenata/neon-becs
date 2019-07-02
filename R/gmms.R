@@ -15,7 +15,9 @@ make_isd <- function(community_energy){
 #' @return mclust fit
 #' @export
 #' @importFrom mclust Mclust mclustBIC mclust.options emControl densityMclust
+#' @importFrom dplyr filter
 fit_gmm <- function(isd){
+  isd <- dplyr::filter(isd, !is.na(ln_size))
   this_fit <- mclust::densityMclust(isd$ln_size, G = 1:15, modelNames = "V",
                  prior = NULL,
                  control = emControl(),
